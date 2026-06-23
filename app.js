@@ -42,6 +42,8 @@ app.use(cors({
   credentials: true
 }));
 
+
+
 app.use(express.json());
 
 app.use("/api/inngest", serve({ client: inngest, functions }));

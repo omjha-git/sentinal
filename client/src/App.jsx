@@ -31,7 +31,7 @@ import {
 } from "@clerk/clerk-react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
-const API = `${import.meta.env.VITE_API_URL}/api`;
+const API = import.meta.env.VITE_API_URL;
 
 // ─── helper ────────────────────────────────────────────────────────────────
 function fileIcon(name) {

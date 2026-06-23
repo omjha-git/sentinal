@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "http://localhost:3000";
+const API = import.meta.env.VITE_API_URL;
 
 export const getProjectFiles = async (projectId) => {
   const res = await axios.get(`${API}/api/projects/${projectId}/files`);

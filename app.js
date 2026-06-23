@@ -33,18 +33,22 @@ const { inngest, functions } = require("./inngest");
 
 const app = express();
 const PORT = 3000;
+app.use(express.json());
 
 app.use(cors({
   origin: [
     "http://localhost:5173",
     "https://sentinal-ochre.vercel.app"
   ],
-  credentials: true
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
 }));
 
+app.options("*", cors());
 
 
-app.use(express.json());
+
 
 app.use("/api/inngest", serve({ client: inngest, functions }));
 

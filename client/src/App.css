@@ -1,0 +1,502 @@
+/* ─────────────────────────────────────────────
+   SENTINAL IDE — FIXED LAYOUT CSS
+   Root cause: missing height constraints on the
+   flex column chain. Every ancestor of CodeMirror
+   must have a real, finite height so that
+   flex children can shrink and the terminal
+   stays pinned at the bottom.
+───────────────────────────────────────────── */
+
+/* ── 1. IDE SHELL (outermost wrapper) ───────── */
+.ide-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;          /* FIX: anchor the entire IDE to the viewport */
+  overflow: hidden;       /* FIX: nothing escapes the shell */
+}
+
+/* ── 2. PANEL GROUP (horizontal split) ──────── */
+/* react-resizable-panels renders its own div;
+   target it via className prop or data-attribute.
+   The .ide-panels className goes on PanelGroup. */
+.ide-panels {
+  flex: 1;                /* FIX: fill remaining height below navbar */
+  min-height: 0;          /* FIX: allow flex item to shrink — this is the key rule
+                                  flexbox default is min-height: auto which prevents shrinking */
+  overflow: hidden;
+  display: flex;          /* react-resizable-panels is already flex; keep it */
+}
+
+/* ── 3. EDITOR LAYOUT (flex column inside center Panel) */
+.editor-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;           /* FIX: fill the Panel's allocated height */
+  min-height: 0;          /* FIX: allow this column to shrink */
+  overflow: hidden;
+}
+
+/* ── 4. FILE TABS BAR ───────────────────────── */
+.file-tabs {
+  flex-shrink: 0;         /* FIX: never compress the tabs bar */
+  height: 46px;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+/* ── 5. EDITOR TABS BAR (Code / Preview switcher) */
+.editor-tabs {
+  flex-shrink: 0;         /* FIX: never compress */
+  height: 48px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+/* ── 6. CODE AREA — the scrollable editor zone ─ */
+.code-area {
+  flex: 1;                /* FIX: absorb all remaining height */
+  min-height: 0;          /* FIX: allow shrinking — without this, flex: 1 still
+                                  lets the div grow to content height */
+  overflow: hidden;       /* FIX: clip the editor; CodeMirror scrolls internally */
+  position: relative;
+}
+
+/* ── 7. CODE EDITOR WRAPPER ─────────────────── */
+.code-editor-wrap {
+  height: 100%;           /* FIX: fill .code-area exactly */
+  min-height: 0;
+  overflow: hidden;       /* FIX: do not let the cm-editor overflow this box */
+  position: relative;
+}
+
+/* CodeMirror's root element must fill the wrapper */
+.code-editor-wrap .cm-editor {
+  height: 100% !important;
+  max-height: 100% !important;
+}
+
+/* CodeMirror's scroller handles internal scrolling */
+.code-editor-wrap .cm-scroller {
+  overflow: auto !important;
+}
+
+/* ── 8. TERMINAL PANEL ───────────────────────── */
+.terminal-panel {
+  flex-shrink: 0;         /* FIX: never let the terminal compress or disappear */
+  /* Height is set inline via style prop so the
+     hide/show toggle works. The CSS sets the
+     minimum so it can never vanish completely. */
+  border-top: 1px solid rgba(124, 58, 237, 0.25);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.terminal-head {
+  flex-shrink: 0;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  font-size: 12px;
+  color: rgba(196, 168, 224, 0.7);
+  border-bottom: 1px solid rgba(124, 58, 237, 0.15);
+}
+
+.terminal-head .active {
+  color: #e9d5ff;
+  font-weight: 700;
+}
+
+.terminal-body {
+  flex: 1;                /* FIX: fill remaining terminal height */
+  min-height: 0;          /* FIX: allow shrinking */
+  overflow-y: auto;       /* FIX: internal scroll only */
+  padding: 8px 12px;
+  font-family: monospace;
+  font-size: 13px;
+  color: #a0e0a0;
+}
+
+.terminal-body p {
+  margin: 2px 0;
+  line-height: 1.5;
+}
+
+/* ── 9. AI PANEL ─────────────────────────────── */
+.ai-side-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;           /* FIX: fill Panel height */
+  min-height: 0;
+  overflow: hidden;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+/* Chat body scrolls, everything else is fixed */
+.chat-body {
+  flex: 1;
+  min-height: 0;          /* FIX: allow shrinking */
+  overflow-y: auto;
+  padding: 12px;
+  margin: 12px 0;
+  border-top: 1px solid rgba(124, 58, 237, 0.2);
+  border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+/* All non-scrolling chat parts stay fixed size */
+.chat-head,
+.chat-tools,
+.ai-actions,
+.chat-input-row,
+.danger {
+  flex-shrink: 0;
+}
+
+/* ── 10. EXPLORER SIDEBAR ───────────────────── */
+.ide-sidebar {
+  height: 100%;           /* FIX: fill Panel height */
+  overflow-y: auto;       /* FIX: sidebar scrolls internally */
+  padding: 18px 20px;
+  box-sizing: border-box;
+}
+
+.ide-sidebar h3 {
+  font-size: 22px;
+  margin-bottom: 14px;
+  color: #e9d5ff;
+}
+
+/* ── 11. NAVBAR (fixed top bar) ─────────────── */
+.ide-navbar {
+  flex-shrink: 0;         /* FIX: never compress */
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  border-bottom: 1px solid rgba(124, 58, 237, 0.25);
+}
+
+/* ── 12. PREVIEW IFRAME ──────────────────────── */
+.preview-frame {
+  width: 100%;
+  height: 100%;           /* FIX: fill .code-area exactly */
+  border: none;
+  display: block;
+}
+
+/* ── 13. TREE NODES ──────────────────────────── */
+.tree-node {
+  width: 100%;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-radius: 10px;
+  margin: 3px 0;
+  box-sizing: border-box;
+}
+
+.tree-node button {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: #c4a8e0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 15px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.tree-node:hover,
+.tree-node.active {
+  background: rgba(168, 85, 247, 0.18);
+}
+
+.tree-node.active button {
+  color: white;
+  font-weight: 700;
+}
+
+.folder-node button {
+  font-weight: 800;
+  color: #e9d5ff;
+}
+
+.tree-actions {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  color: #9f7aea;
+  padding-right: 6px;
+}
+
+.tree-node:hover .tree-actions {
+  display: flex;
+}
+
+.tree-actions svg {
+  cursor: pointer;
+}
+
+.tree-actions svg:hover {
+  color: #ffd700;
+}
+
+/* ── 14. FILE TAB BUTTONS ───────────────────── */
+.file-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  height: 100%;
+  background: transparent;
+  border: none;
+  border-right: 1px solid rgba(124, 58, 237, 0.2);
+  color: #c4a8e0;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.file-tab.active {
+  color: #fff;
+  background: rgba(124, 58, 237, 0.2);
+}
+
+.file-tab span {
+  opacity: 0.5;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.file-tab span:hover {
+  opacity: 1;
+  color: #ff6b6b;
+}
+
+/* ── 15. EDITOR TAB BUTTONS ─────────────────── */
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  height: 100%;
+  background: transparent;
+  border: none;
+  border-right: 1px solid rgba(124, 58, 237, 0.15);
+  color: #9f7aea;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.tab.active {
+  color: #e9d5ff;
+  border-bottom: 2px solid #a855f7;
+}
+
+/* ── 16. CHAT BUBBLES ────────────────────────── */
+.bubble {
+  width: 100%;
+  max-width: 100%;
+  padding: 14px;
+  border-radius: 16px;
+  margin-bottom: 12px;
+  word-break: break-word;
+  white-space: pre-wrap;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+.bubble.ai {
+  background: #170827;
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  color: #e9d5ff;
+}
+
+.bubble.user {
+  background: #7c3aed;
+  color: white;
+  margin-left: auto;
+}
+
+.bubble.assistant {
+  background: #170827;
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  color: #e9d5ff;
+}
+
+/* ── 17. CHAT INPUT ──────────────────────────── */
+.chat-input-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.chat-input-row textarea {
+  flex: 1;
+  height: 80px;
+  min-height: 80px;
+  border-radius: 14px;
+  background: #0b0415;
+  border: 1px solid rgba(124, 58, 237, 0.4);
+  color: white;
+  padding: 14px;
+  resize: none;
+  font-size: 14px;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.chat-input-row button {
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: 50%;
+  background: #a855f7;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  align-self: flex-end;
+}
+
+/* ── 18. CHAT TOOLS GRID ─────────────────────── */
+.chat-tools {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+/* ── 19. AI ACTIONS ──────────────────────────── */
+.ai-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.ai-actions button {
+  background: rgba(124, 58, 237, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: #d8b4fe;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.ai-actions button:hover {
+  background: rgba(124, 58, 237, 0.28);
+  color: white;
+}
+
+/* ── 20. DANGER BUTTON ───────────────────────── */
+.danger {
+  margin-top: 14px;
+  border-radius: 14px;
+  padding: 14px;
+  background: #2a0a14;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── 21. STATUS BADGE ────────────────────────── */
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #2b2100;
+  color: #ffd700;
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  font-size: 12px;
+}
+
+/* ── 22. HISTORY OVERLAY ─────────────────────── */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 20px;
+}
+
+.history-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.history-role {
+  color: #c084fc;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.history-content {
+  color: #e5e7eb;
+  line-height: 1.6;
+  margin-bottom: 10px;
+  word-break: break-word;
+}
+
+.history-time {
+  color: #71717a;
+  font-size: 12px;
+}
+
+/* ── 23. CHAT HEAD ───────────────────────────── */
+.chat-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.agent-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* ── 24. RESIZE HANDLE ───────────────────────── */
+.resize-handle {
+  width: 4px;
+  background: rgba(124, 58, 237, 0.15);
+  cursor: col-resize;
+  transition: background 0.2s;
+}
+
+.resize-handle:hover,
+.resize-handle[data-resize-handle-active] {
+  background: rgba(168, 85, 247, 0.5);
+}
+
+/* ── 25. IDE SIDEBAR BUTTON RESETS ───────────── */
+.ide-sidebar button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}

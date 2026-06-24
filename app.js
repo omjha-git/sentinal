@@ -41,18 +41,15 @@ const allowedOrigins = [
   "https://sentinal-git-main-om-s-projects10.vercel.app",
 ];
 
-app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://sentinal-ochre.vercel.app",
-    "https://sentinal-git-main-om-s-projects10.vercel.app",
-  ],
+const corsOptions = {
+  origin: allowedOrigins,
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-}));
+};
 
-app.options(/.*/, cors());
+app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 
 
 

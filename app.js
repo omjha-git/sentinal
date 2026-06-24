@@ -39,10 +39,17 @@ const allowedOrigins = [
   "http://localhost:5173",
   "https://sentinal-ochre.vercel.app",
   "https://sentinal-git-main-om-s-projects10.vercel.app",
+  "https://sentinal-in3qz39y-om-s-projects10.vercel.app",
 ];
 
 const corsOptions = {
-  origin: allowedOrigins,
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS blocked: " + origin));
+    }
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],

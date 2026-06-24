@@ -33,30 +33,23 @@ const { inngest, functions } = require("./inngest");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.use(express.json());
-
 const allowedOrigins = [
   "http://localhost:5173",
   "https://sentinal-ochre.vercel.app",
   "https://sentinal-git-main-om-s-projects10.vercel.app",
-  "https://sentinal-in3qz39y-om-s-projects10.vercel.app",
 ];
 
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("CORS blocked: " + origin));
-    }
-  },
+  origin: allowedOrigins,
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
+app.use(express.json());
 app.use(cors(corsOptions));
 app.options(/.*/, cors(corsOptions));
+
 
 
 
@@ -106,6 +99,21 @@ app.post("/api/firecrawl/scrape", async (req, res) => {
 
 app.get("/", (req, res) => {
   res.send("Sentinal backend running");
+});
+app.get("/api/projects", async (req, res) => {
+  try {
+    const projects = await Project.find().sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      projects,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: err.message,
+    });
+  }
 });
 
 app.post("/api/projects", async (req, res) => {
@@ -772,12 +780,8 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.get("/api/projects", async (req, res) => {
-  res.json({ message: "Projects route working" });
-});
-
-app.post("/api/projects", async (req, res) => {
-  res.json({ message: "Project created", body: req.body });
+app.use((req, res) => {
+  res.status(404).send("Not Found");
 });
 
 app.listen(PORT, () => {

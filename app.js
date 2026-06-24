@@ -772,6 +772,14 @@ app.use((err, req, res, next) => {
   });
 });
 
+app.get("/api/projects", async (req, res) => {
+  res.json({ message: "Projects route working" });
+});
+
+app.post("/api/projects", async (req, res) => {
+  res.json({ message: "Project created", body: req.body });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
